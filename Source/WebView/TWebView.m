@@ -44,7 +44,6 @@
 #import "TWebViewConfig.h"
 #import "UIView+TWVLayout.h"
 #import "TWKWebViewDelegate.h"
-#import "TUIWebViewDelegate.h"
 
 static const NSString * WKWebViewProcessPoolKey = @"WKWebViewProcessPoolKey";
 
@@ -53,7 +52,6 @@ static const NSString * WKWebViewProcessPoolKey = @"WKWebViewProcessPoolKey";
 @property (nonatomic, strong) WKProcessPool *processPool;
 
 @property (nonatomic, strong) TWKWebViewDelegate *wkWebViewDelegate;
-@property (nonatomic, strong) TUIWebViewDelegate *uiWebViewDelegate;
 
 @property (nonatomic, strong) UIProgressView *progressView;
 @property (nonatomic, weak) NSLayoutConstraint *progressViewTopConstraint;
@@ -65,19 +63,14 @@ static const NSString * WKWebViewProcessPoolKey = @"WKWebViewProcessPoolKey";
 
 #pragma mark - Memory
 - (void)dealloc {
-    if (@available(iOS 8, *)) {
-        [self->_wkWebView stopLoading];
-        self->_wkWebView.UIDelegate = nil;
-        self->_wkWebView.navigationDelegate = nil;
-        [self->_wkWebView removeObserver:self forKeyPath:@"estimatedProgress"];
-        [self->_wkWebView removeObserver:self forKeyPath:@"title"];
-        [self->_wkWebView removeObserver:self forKeyPath:@"scrollView.contentInset"];
-    } else {
-        [self->_uiWebView stopLoading];
-        self->_uiWebView.delegate = nil;
-        [self->_uiWebView removeObserver:self forKeyPath:@"scrollView.contentInset"];
-        [[NSNotificationCenter defaultCenter] removeObserver:self];
-    }
+    
+    [self->_wkWebView stopLoading];
+    self->_wkWebView.UIDelegate = nil;
+    self->_wkWebView.navigationDelegate = nil;
+    [self->_wkWebView removeObserver:self forKeyPath:@"estimatedProgress"];
+    [self->_wkWebView removeObserver:self forKeyPath:@"title"];
+    [self->_wkWebView removeObserver:self forKeyPath:@"scrollView.contentInset"];
+    
 }
 
 #pragma mark - Init
@@ -316,64 +309,35 @@ static const NSString * WKWebViewProcessPoolKey = @"WKWebViewProcessPoolKey";
 }
 
 - (UIView *)contentWebView {
-    if (@available(iOS 8, *)) {
-        return self->_wkWebView;
-    } else {
-        return self->_uiWebView;
-    }
+    return self->_wkWebView;
 }
 
 - (UIScrollView *)scrollView {
-    if (@available(iOS 8, *)) {
-        return self->_wkWebView.scrollView;
-    } else {
-        return self->_uiWebView.scrollView;
-    }
+    return self->_wkWebView.scrollView;
 }
 
 - (BOOL)canGoBack {
-    if (@available(iOS 8, *)) {
-        return self->_wkWebView.canGoBack;
-    } else {
-        return self->_uiWebView.canGoBack;
-    }
+    return self->_wkWebView.canGoBack;
 }
 
 - (BOOL)canGoForward {
-    if (@available(iOS 8, *)) {
-        return self->_wkWebView.canGoForward;
-    } else {
-        return self->_uiWebView.canGoForward;
-    }
+    return self->_wkWebView.canGoForward;
 }
 
 - (BOOL)isLoading {
-    if (@available(iOS 8, *)) {
-        return self->_wkWebView.isLoading;
-    } else {
-        return self->_uiWebView.isLoading;
-    }
+    return self->_wkWebView.isLoading;
 }
 
 - (NSString *)title {
-    if (@available(iOS 9, *)) {
-        return self->_wkWebView.title;
-    } else {
-        return [self->_uiWebView stringByEvaluatingJavaScriptFromString:@"document.title"];
-    }
+    return self->_wkWebView.title;
 }
 
 
 #pragma mark - Create UI
 - (void)setUI {
     UIView *webView;
-    if (@available(iOS 8, *)) {
-        [self setupWKWebView];
-        webView = self->_wkWebView;
-    } else {
-        [self setupUIWebView];
-        webView = self->_uiWebView;
-    }
+    [self setupWKWebView];
+    webView = self->_wkWebView;
     self.layer.masksToBounds = YES;
     
     [self addSubview:webView];
@@ -426,26 +390,6 @@ static const NSString * WKWebViewProcessPoolKey = @"WKWebViewProcessPoolKey";
     });
 }
 
-- (void)setupUIWebView {
-    self->_uiWebView = ({
-        UIWebView *webView = [[UIWebView alloc] init];
-        self.uiWebViewDelegate = [TUIWebViewDelegate getDelegateWith:self];
-        webView.delegate = self.uiWebViewDelegate;
-        webView.layer.masksToBounds = NO;
-        webView.scrollView.layer.masksToBounds = NO;
-        [webView addObserver:self forKeyPath:@"scrollView.contentInset" options:NSKeyValueObservingOptionNew context:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(appWillResignActive:)
-                                                     name:UIApplicationWillResignActiveNotification
-                                                   object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(appDidBecomeActive:)
-                                                     name:UIApplicationDidBecomeActiveNotification
-                                                   object:nil];
-        webView;
-    });
-}
-
 - (void)setupProgressView {
     if (self.progressView != nil) {
         return;
@@ -473,11 +417,8 @@ static const NSString * WKWebViewProcessPoolKey = @"WKWebViewProcessPoolKey";
 - (CGFloat)getTopInset {
     if (@available(iOS 11.0, *)) {
         return self.safeAreaInsets.top;
-    } else if (@available(iOS 8, *)) {
-        return self->_wkWebView.scrollView.contentInset.top;
-    } else {
-        return self->_uiWebView.scrollView.contentInset.top;
     }
+    return self->_wkWebView.scrollView.contentInset.top;
 }
 
 - (void)resetProgressViewTopInsert {
@@ -485,121 +426,29 @@ static const NSString * WKWebViewProcessPoolKey = @"WKWebViewProcessPoolKey";
     self.progressViewTopConstraint.constant = constant;
 }
 
-
-#pragma mark - OpenGL ES Crash
-// OpenGL ES Crash: https://forums.developer.apple.com/thread/30896
-- (void)appWillResignActive:(NSNotification *)notification {
-    [self enableUIWebViewOpenGL:NO];
-}
-
-- (void)appDidBecomeActive:(NSNotification *)notification {
-    [self enableUIWebViewOpenGL:YES];
-}
-
-typedef void (*CallFuc)(id, SEL, BOOL);
-typedef BOOL (*GetFuc)(id, SEL);
-- (BOOL)enableUIWebViewOpenGL:(BOOL)enableOpenGL {
-    if (@available(iOS 8, *)) {
-        return NO;
-    } else {
-        BOOL bRet = NO;
-        do {
-            Ivar internalVar = class_getInstanceVariable([self->_uiWebView class], "_internal");
-            if (!internalVar) {
-                TLog(@"enable GL _internal invalid!");
-                break;
-            }
-            
-            UIWebViewInternal *internalObj = object_getIvar(_uiWebView, internalVar);
-            Ivar browserVar = class_getInstanceVariable(object_getClass(internalObj), "browserView");
-            if (!browserVar) {
-                TLog(@"enable GL browserView invalid!");
-                break;
-            }
-            
-            id webbrowser = object_getIvar(internalObj, browserVar);
-            Ivar webViewVar = class_getInstanceVariable(object_getClass(webbrowser), "_webView");
-            if (!webViewVar) {
-                TLog(@"enable GL _webView invalid!");
-                break;
-            }
-            
-            id webView = object_getIvar(webbrowser, webViewVar);
-            if (!webView) {
-                TLog(@"enable GL webView obj nil!");
-            }
-            
-            if(object_getClass(webView) != NSClassFromString(@"WebView")) {
-                NSLog(@"enable GL webView not WebView!");
-                break;
-            }
-            
-            SEL selectorSet = NSSelectorFromString(@"_setWebGLEnabled:");
-            IMP impSet = [webView methodForSelector:selectorSet];
-            CallFuc funcSet = (CallFuc)impSet;
-            funcSet(webView, selectorSet, enableOpenGL);
-            
-            SEL selectorGet = NSSelectorFromString(@"_webGLEnabled");
-            IMP impGet = [webView methodForSelector:selectorGet];
-            GetFuc funcGet = (GetFuc)impGet;
-            BOOL val = funcGet(webView, selectorGet);
-            
-            bRet = (val == enableOpenGL);
-            
-        } while(NO);
-        TLog(@"set: %@,  success: %@", enableOpenGL ? @"YES" : @"NO", bRet ? @"YES" : @"NO");
-        return bRet;
-    }
-}
-
-
 #pragma mark - Function
 - (void)reload {
-    if (@available(iOS 8, *)) {
-        [self->_wkWebView reload];
-    } else {
-        [self->_uiWebView reload];
-    }
+    [self->_wkWebView reload];
 }
 
 - (void)stopLoading {
-    if (@available(iOS 8, *)) {
-        [self->_wkWebView stopLoading];
-    } else {
-        [self->_uiWebView stopLoading];
-    }
+    [self->_wkWebView stopLoading];
 }
 
 - (void)goBack {
-    if (@available(iOS 8, *)) {
-        [self->_wkWebView goBack];
-    } else {
-        [self->_uiWebView goBack];
-    }
+    [self->_wkWebView goBack];
 }
 
 - (void)goForward {
-    if (@available(iOS 8, *)) {
-        [self->_wkWebView goForward];
-    } else {
-        [self->_uiWebView goForward];
-    }
+    [self->_wkWebView goForward];
 }
 
 - (void)loadRequest:(NSURLRequest *)request {
-    if (@available(iOS 8, *)) {
-        [self->_wkWebView loadRequest:request];
-    } else {
-        [self->_uiWebView loadRequest:request];
-    }
+    [self->_wkWebView loadRequest:request];
 }
 
 - (void)loadHTMLString:(NSString *)string baseURL:(NSURL *)baseURL {
-    if (@available(iOS 8, *)) {
-        [self->_wkWebView loadHTMLString:string baseURL:baseURL];
-    } else {
-        [self->_uiWebView loadHTMLString:string baseURL:baseURL];
-    }
+    [self->_wkWebView loadHTMLString:string baseURL:baseURL];
 }
 
 - (void)loadData:(NSData *)data MIMEType:(NSString *)MIMEType textEncodingName:(NSString *)textEncodingName baseURL:(NSURL *)baseURL {
@@ -607,8 +456,6 @@ typedef BOOL (*GetFuc)(id, SEL);
         [self->_wkWebView loadData:data MIMEType:MIMEType characterEncodingName:textEncodingName baseURL:baseURL];
     } else if (@available(iOS 8, *)) {
         TLog(@"iOS8不可使用本方法，支持9.0以上或者8.0以下（不包含8.0）");
-    } else {
-        [self->_uiWebView loadData:data MIMEType:MIMEType textEncodingName:textEncodingName baseURL:baseURL];
     }
 }
 
@@ -638,19 +485,15 @@ typedef BOOL (*GetFuc)(id, SEL);
     }
     if (@available(iOS 9, *)) {
         [self->_wkWebView loadFileURL:realFileURL allowingReadAccessToURL:baseURL ?: realFileURL];
-    } else if (@available(iOS 8, *)) {
-        NSString *tmpBasePath = [self copyFilesFromBasePath:basePath ?: realFilePath];
-        NSURL *tmpFileURL = [NSURL fileURLWithPath:tmpBasePath];
-        if (relativeFilePath) {
-            NSString *tmpFilePath = [tmpBasePath ?: @"" stringByAppendingPathComponent:relativeFilePath];
-            tmpFileURL = [NSURL fileURLWithPath:tmpFilePath];
-        }
-        if (tmpFileURL) {
-            [self->_wkWebView loadRequest:[NSURLRequest requestWithURL:tmpFileURL]];
-        }
-    } else {
-        // is UIWebView
-        [self->_uiWebView loadRequest:[NSURLRequest requestWithURL:realFileURL]];
+    }
+    NSString *tmpBasePath = [self copyFilesFromBasePath:basePath ?: realFilePath];
+    NSURL *tmpFileURL = [NSURL fileURLWithPath:tmpBasePath];
+    if (relativeFilePath) {
+        NSString *tmpFilePath = [tmpBasePath ?: @"" stringByAppendingPathComponent:relativeFilePath];
+        tmpFileURL = [NSURL fileURLWithPath:tmpFilePath];
+    }
+    if (tmpFileURL) {
+        [self->_wkWebView loadRequest:[NSURLRequest requestWithURL:tmpFileURL]];
     }
 }
 
@@ -914,49 +757,29 @@ typedef BOOL (*GetFuc)(id, SEL);
 }
 
 - (void)runJavascript:(NSString *)js completion:(void (^ _Nullable)(id _Nullable, NSError * _Nullable))completion {
-    if (@available(iOS 8, *)) {
-        void (^completionBlock)(id _Nullable, NSError * _Nullable) = ^(id _Nullable obj, NSError * _Nullable error) {
-            if (completion == nil) {
-                return;
-            }
-            
-            if (error != nil) {
-                NSMutableDictionary *errorDict = [@{@"WebView":self,
-                                                    @"WebViewType":@"WKWebView",
-                                                    @"ErrorJSString":js} mutableCopy];
-                [errorDict addEntriesFromDictionary:error.userInfo];
-                
-                NSError *jsError = [NSError errorWithDomain:error.domain
-                                                       code:error.code
-                                                   userInfo:errorDict];
-                TLog(@"%@", jsError);
-                completion(obj, jsError);
-            } else {
-                completion(obj, nil);
-            }
-        };
-        
-        [self->_wkWebView evaluateJavaScript:js
-                           completionHandler:completionBlock];
-    } else {
-        NSString *resultString = [self->_uiWebView stringByEvaluatingJavaScriptFromString:js];
+    void (^completionBlock)(id _Nullable, NSError * _Nullable) = ^(id _Nullable obj, NSError * _Nullable error) {
         if (completion == nil) {
             return;
         }
         
-        if (resultString) {
-            completion(resultString, nil);
-        } else {
-            NSDictionary *errorDict = @{@"WebView":self,
-                                        @"WebViewType":@"UIWebView",
-                                        @"ErrorJSString":js};
-            NSError *jsError = [NSError errorWithDomain:@"Result_NULL"
-                                                   code:-1
+        if (error != nil) {
+            NSMutableDictionary *errorDict = [@{@"WebView":self,
+                                                @"WebViewType":@"WKWebView",
+                                                @"ErrorJSString":js} mutableCopy];
+            [errorDict addEntriesFromDictionary:error.userInfo];
+            
+            NSError *jsError = [NSError errorWithDomain:error.domain
+                                                   code:error.code
                                                userInfo:errorDict];
             TLog(@"%@", jsError);
-            completion(nil, jsError);
+            completion(obj, jsError);
+        } else {
+            completion(obj, nil);
         }
-    }
+    };
+    
+    [self->_wkWebView evaluateJavaScript:js
+                       completionHandler:completionBlock];
 }
 
 @end

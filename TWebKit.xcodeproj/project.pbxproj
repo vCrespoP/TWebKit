@@ -27,13 +27,11 @@
 		D7FF80F31F2B0FD30033715E /* TWebViewCommonDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = D7FF80EB1F2B0FC30033715E /* TWebViewCommonDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D7FF80F41F2B0FD50033715E /* TWebViewConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = D7FF80ED1F2B0FC30033715E /* TWebViewConfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D7FF80F51F2B0FD80033715E /* TWebViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = D7FF80EF1F2B0FC30033715E /* TWebViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		D7FF80F61F2B0FE00033715E /* TUIWebViewDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = D7FF80D01F2B0F9C0033715E /* TUIWebViewDelegate.h */; };
 		D7FF80F71F2B0FE30033715E /* TWKWebViewDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = D7FF80D21F2B0F9C0033715E /* TWKWebViewDelegate.h */; };
 		D7FF80F81F2B0FE80033715E /* TDefineAndCFunc.h in Headers */ = {isa = PBXBuildFile; fileRef = D7FF80E11F2B0F9C0033715E /* TDefineAndCFunc.h */; };
 		D7FF80F91F2B0FEB0033715E /* UIView+TWVLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = D7FF80E31F2B0F9C0033715E /* UIView+TWVLayout.h */; };
 		D7FF80FB1F2B10010033715E /* TDefineAndCFunc.m in Sources */ = {isa = PBXBuildFile; fileRef = D7FF80E21F2B0F9C0033715E /* TDefineAndCFunc.m */; };
 		D7FF80FD1F2B10010033715E /* UIView+TWVLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = D7FF80E41F2B0F9C0033715E /* UIView+TWVLayout.m */; };
-		D7FF80FF1F2B10010033715E /* TUIWebViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D7FF80D11F2B0F9C0033715E /* TUIWebViewDelegate.m */; };
 		D7FF81011F2B10010033715E /* TWKWebViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D7FF80D31F2B0F9C0033715E /* TWKWebViewDelegate.m */; };
 		D7FF81051F2B10010033715E /* TWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = D7FF80E91F2B0FC30033715E /* TWebView.m */; };
 		D7FF81081F2B10010033715E /* TWebViewCommonDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D7FF80EC1F2B0FC30033715E /* TWebViewCommonDelegate.m */; };
@@ -88,8 +86,6 @@
 		D7E8500B1F29F32A00C64263 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D7E850181F29F51700C64263 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		D7FF80C41F2ADD710033715E /* CustomWebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomWebViewController.swift; sourceTree = "<group>"; };
-		D7FF80D01F2B0F9C0033715E /* TUIWebViewDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TUIWebViewDelegate.h; sourceTree = "<group>"; };
-		D7FF80D11F2B0F9C0033715E /* TUIWebViewDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TUIWebViewDelegate.m; sourceTree = "<group>"; };
 		D7FF80D21F2B0F9C0033715E /* TWKWebViewDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TWKWebViewDelegate.h; sourceTree = "<group>"; };
 		D7FF80D31F2B0F9C0033715E /* TWKWebViewDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TWKWebViewDelegate.m; sourceTree = "<group>"; };
 		D7FF80E11F2B0F9C0033715E /* TDefineAndCFunc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TDefineAndCFunc.h; sourceTree = "<group>"; };
@@ -206,8 +202,6 @@
 		D7FF80CF1F2B0F9C0033715E /* WebViewDelegate */ = {
 			isa = PBXGroup;
 			children = (
-				D7FF80D01F2B0F9C0033715E /* TUIWebViewDelegate.h */,
-				D7FF80D11F2B0F9C0033715E /* TUIWebViewDelegate.m */,
 				D7FF80D21F2B0F9C0033715E /* TWKWebViewDelegate.h */,
 				D7FF80D31F2B0F9C0033715E /* TWKWebViewDelegate.m */,
 			);
@@ -254,7 +248,6 @@
 				D7FF80F41F2B0FD50033715E /* TWebViewConfig.h in Headers */,
 				D7FF80F51F2B0FD80033715E /* TWebViewController.h in Headers */,
 				D7FF80F31F2B0FD30033715E /* TWebViewCommonDelegate.h in Headers */,
-				D7FF80F61F2B0FE00033715E /* TUIWebViewDelegate.h in Headers */,
 				D7FF80F71F2B0FE30033715E /* TWKWebViewDelegate.h in Headers */,
 				D7FF80F81F2B0FE80033715E /* TDefineAndCFunc.h in Headers */,
 				D7FF80F91F2B0FEB0033715E /* UIView+TWVLayout.h in Headers */,
@@ -373,7 +366,6 @@
 				D7FF810F1F2B10C10033715E /* TWebKitSetting.m in Sources */,
 				D7FF80FB1F2B10010033715E /* TDefineAndCFunc.m in Sources */,
 				D7FF80FD1F2B10010033715E /* UIView+TWVLayout.m in Sources */,
-				D7FF80FF1F2B10010033715E /* TUIWebViewDelegate.m in Sources */,
 				D7FF81011F2B10010033715E /* TWKWebViewDelegate.m in Sources */,
 				D7FF81051F2B10010033715E /* TWebView.m in Sources */,
 				D7FF81081F2B10010033715E /* TWebViewCommonDelegate.m in Sources */,
